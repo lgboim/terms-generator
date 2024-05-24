@@ -12,7 +12,10 @@ setup(
         "gunicorn>=20.1.0",
         "openai>=0.8.0",
         "Jinja2>=3.0",
-        "gunicorn"
+        "SQLAlchemy>=1.4",
+        "Flask-SQLAlchemy>=2.5",
+        "Flask-Migrate>=3.1",
+        "psycopg2-binary>=2.8"  # Ensure compatibility with PostgreSQL
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
