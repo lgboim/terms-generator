@@ -2,6 +2,17 @@
 
 A Flask web application that generates detailed explanations and related terms for a given term using OpenAI's GPT-3.5 model.
 
+## Why This App?
+
+The Terms Generator app was created to provide users with a convenient way to generate detailed explanations and related terms for any given term. Whether you are a student, a professional, or simply someone looking to expand your knowledge, this app can help you quickly understand complex terms and discover related concepts. By leveraging OpenAI's powerful GPT-3.5 model, the app ensures high-quality and informative content.
+
+## Goals
+
+- **Educational Resource:** Provide users with detailed explanations of various terms to enhance their learning experience.
+- **Knowledge Expansion:** Help users discover related terms and concepts, broadening their understanding of different subjects.
+- **Convenience:** Offer a user-friendly platform where users can easily search for terms and get instant, accurate information.
+- **Integration with OpenAI:** Demonstrate the practical use of OpenAI's GPT-3.5 model in generating high-quality content.
+
 ## Features
 
 - Generate detailed explanations for terms.
@@ -94,6 +105,15 @@ A Flask web application that generates detailed explanations and related terms f
 2. To generate term details, navigate to `/term/<term>` where `<term>` is the term you want to search.
 3. Use the search functionality to find terms by navigating to `/search`.
 
+## Adding Terms
+
+To add terms and generate detailed explanations along with related terms, you can use the deployed application:
+
+- Visit [Terms Generator](https://terms-a2d0dcfc4f4a.herokuapp.com/).
+- Set your OpenAI API key by navigating to `/set_api_key`.
+- Enter the term you want to generate details for by navigating to `/term/<term>` where `<term>` is the term you want to search.
+- The application will generate and display the term details along with related terms.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -111,4 +131,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [OpenAI](https://openai.com/) for providing the GPT-3.5 model.
 - [Flask](https://flask.palletsprojects.com/) for the web framework.
 - [Heroku](https://www.heroku.com/) for deployment.
-
