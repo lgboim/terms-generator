@@ -18,7 +18,7 @@ def generate_term_explanation(term, api_key):
         n=1,
         temperature=0.7,
     )
-    explanation = response.choices[0].message['content']
+    explanation = response.choices[0].message.content
     explanation = explanation.replace('\n', '<br>')
     return explanation
 
@@ -32,7 +32,7 @@ def generate_related_terms(term, api_key):
         n=1,
         temperature=0.7,
     )
-    related_terms = response.choices[0].message['content']
+    related_terms = response.choices[0].message.content
     related_terms = re.split(r'\d+\.\s*|\s*,\s*|\s+and\s+', related_terms)
     return [t.strip() for t in related_terms if t.strip()]
 
