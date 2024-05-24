@@ -17,15 +17,17 @@ The Terms Generator app was created to provide users with a convenient way to ge
 
 - Generate detailed explanations for terms.
 - Generate related terms for a given term.
-- Save term details to a file.
-- Retrieve term details from a file.
+- Save term details to a database.
+- Retrieve term details from the database.
 - Search functionality to find terms.
+- User management of OpenAI API keys through session.
 
 ## Requirements
 
 - Python 3.7+
 - Flask
-- Gunicorn
+- SQLAlchemy
+- Flask-Migrate
 - OpenAI API Key
 
 ## Installation
@@ -49,13 +51,11 @@ The Terms Generator app was created to provide users with a convenient way to ge
 
 ## Configuration
 
-1. Set your OpenAI API key:
-    - Run the application and navigate to `/set_api_key` to enter your API key.
-    - Alternatively, set the API key directly in the session in the code.
+1. Set your OpenAI API key by navigating to `/set_api_key` in the application, or directly store it in the session within the code.
 
-2. Update the secret key in the `main.py` file:
+2. Set the application's secret key:
     ```python
-    app.secret_key = 'your_secret_key'
+    app.secret_key = 'your_secret_key_here'
     ```
 
 ## Running the Application
@@ -105,15 +105,6 @@ The Terms Generator app was created to provide users with a convenient way to ge
 2. To generate term details, navigate to `/term/<term>` where `<term>` is the term you want to search.
 3. Use the search functionality to find terms by navigating to `/search`.
 
-## Adding Terms
-
-To add terms and generate detailed explanations along with related terms, you can use the deployed application:
-
-- Visit [Terms Generator](https://terms-a2d0dcfc4f4a.herokuapp.com/).
-- Set your OpenAI API key by navigating to `/set_api_key`.
-- Enter the term you want to generate details for by navigating to `/term/<term>` where `<term>` is the term you want to search.
-- The application will generate and display the term details along with related terms.
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -129,5 +120,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgements
 
 - [OpenAI](https://openai.com/) for providing the GPT-3.5 model.
-- [Flask](https://flask.palletsprojects.com/) for the web framework.
+- [Flask](https://flask.palletsprojects.com/) and [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/) for the web framework and database migrations.
 - [Heroku](https://www.heroku.com/) for deployment.
