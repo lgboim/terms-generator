@@ -6,11 +6,11 @@ import re
 from openai import OpenAI
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed for session management
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback_secret_key')  # Use environment variable for secrets
 
 # Correcting the DATABASE_URL for PostgreSQL compatibility
 uri = os.getenv('DATABASE_URL')
-if uri.startswith("postgres://"):
+if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'sqlite:///db.sqlite'
