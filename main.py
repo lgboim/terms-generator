@@ -3,11 +3,11 @@ import os
 import re
 from openai import OpenAI
 from datetime import datetime, timedelta
+from urllib.parse import quote
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
-# Updated generate_term_explanation and generate_related_terms functions
 def generate_term_explanation(term, api_key):
     client = OpenAI(api_key=api_key)
     prompt = f"Provide a detailed explanation of the term '{term}'."
@@ -18,7 +18,7 @@ def generate_term_explanation(term, api_key):
         n=1,
         temperature=0.7,
     )
-    explanation = response.choices[0].message.content
+    explanation = response.choices[0].message['content']
     explanation = explanation.replace('\n', '<br>')
     return explanation
 
@@ -32,17 +32,15 @@ def generate_related_terms(term, api_key):
         n=1,
         temperature=0.7,
     )
-    related_terms = response.choices[0].message.content
+    related_terms = response.choices[0].message['content']
     related_terms = re.split(r'\d+\.\s*|\s*,\s*|\s+and\s+', related_terms)
     return [t.strip() for t in related_terms if t.strip()]
 
-# Function to save term details to a file
 def save_term(term, explanation, related_terms):
     term_path = os.path.join(app.root_path, 'pages', f'{term}.txt')
     with open(term_path, 'w') as file:
         file.write(f"{explanation}\n\nRelated Terms:\n" + ', '.join(related_terms))
 
-# Function to retrieve term details from a file
 def get_term(term):
     term_path = os.path.join(app.root_path, 'pages', f'{term}.txt')
     if os.path.exists(term_path):
@@ -89,12 +87,10 @@ def search():
         return redirect(url_for('term_page', term=search_term))
     return render_template('search.html')
 
-# Function to generate sitemap XML
 def generate_sitemap():
     pages = []
     ten_days_ago = (datetime.now() - timedelta(days=10)).date().isoformat()
 
-    # Static URLs
     pages.append({
         "loc": url_for('home', _external=True),
         "lastmod": ten_days_ago,
@@ -102,13 +98,13 @@ def generate_sitemap():
         "priority": "1.0"
     })
 
-    # Dynamically add term pages
     terms_dir = os.path.join(app.root_path, 'pages')
     for filename in os.listdir(terms_dir):
         if filename.endswith('.txt'):
             term = filename[:-4]
+            url_friendly_term = quote(term.replace(' ', '-'))
             pages.append({
-                "loc": url_for('term_page', term=term, _external=True),
+                "loc": url_for('term_page', term=url_friendly_term, _external=True),
                 "lastmod": ten_days_ago,
                 "changefreq": "weekly",
                 "priority": "0.8"
