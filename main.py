@@ -35,7 +35,6 @@ def generate_related_terms(term, api_key):
     related_terms = re.split(r'\d+\.\s*|\s*,\s*|\s+and\s+', related_terms)
     return [t.strip() for t in related_terms if t.strip()]
 
-
 # Function to save term details to a file
 def save_term(term, explanation, related_terms):
     term_path = os.path.join(app.root_path, 'pages', f'{term}.txt')
@@ -92,4 +91,5 @@ def search():
     return render_template('search.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
