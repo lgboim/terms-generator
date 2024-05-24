@@ -1,12 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Response
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import os
 import re
 from openai import OpenAI
-from datetime import datetime, timedelta
-from urllib.parse import quote
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
+app.secret_key = 'your_secret_key'  # Needed for session management
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+class Term(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    term = db.Column(db.String(120), unique=True, nullable=False)
+    explanation = db.Column(db.Text, nullable=False)
+    related_terms = db.Column(db.Text, nullable=False)
 
 def generate_term_explanation(term, api_key):
     client = OpenAI(api_key=api_key)
@@ -37,20 +48,18 @@ def generate_related_terms(term, api_key):
     return [t.strip() for t in related_terms if t.strip()]
 
 def save_term(term, explanation, related_terms):
-    term_path = os.path.join(app.root_path, 'pages', f'{term}.txt')
-    with open(term_path, 'w') as file:
-        file.write(f"{explanation}\n\nRelated Terms:\n" + ', '.join(related_terms))
+    new_term = Term(term=term, explanation=explanation, related_terms=', '.join(related_terms))
+    db.session.add(new_term)
+    db.session.commit()
 
 def get_term(term):
-    term_path = os.path.join(app.root_path, 'pages', f'{term}.txt')
-    if os.path.exists(term_path):
-        with open(term_path, 'r') as file:
-            content = file.read().split('\n\nRelated Terms:\n')
-            return {
-                'term': term,
-                'explanation': content[0],
-                'related_terms': content[1].split(', ')
-            }
+    term_record = Term.query.filter_by(term=term).first()
+    if term_record:
+        return {
+            'term': term_record.term,
+            'explanation': term_record.explanation,
+            'related_terms': term_record.related_terms.split(', ')
+        }
     return None
 
 @app.route('/set_api_key', methods=['GET', 'POST'])
@@ -86,36 +95,6 @@ def search():
         search_term = request.form['search_term']
         return redirect(url_for('term_page', term=search_term))
     return render_template('search.html')
-
-def generate_sitemap():
-    pages = []
-    ten_days_ago = (datetime.now() - timedelta(days=10)).date().isoformat()
-
-    pages.append({
-        "loc": url_for('home', _external=True),
-        "lastmod": ten_days_ago,
-        "changefreq": "daily",
-        "priority": "1.0"
-    })
-
-    terms_dir = os.path.join(app.root_path, 'pages')
-    for filename in os.listdir(terms_dir):
-        if filename.endswith('.txt'):
-            term = filename[:-4]
-            url_friendly_term = quote(term.replace(' ', '-'))
-            pages.append({
-                "loc": url_for('term_page', term=url_friendly_term, _external=True),
-                "lastmod": ten_days_ago,
-                "changefreq": "weekly",
-                "priority": "0.8"
-            })
-
-    sitemap_xml = render_template('sitemap_template.xml', pages=pages)
-    return Response(sitemap_xml, mimetype='application/xml')
-
-@app.route('/sitemap.xml', methods=['GET'])
-def sitemap():
-    return generate_sitemap()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
