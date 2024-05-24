@@ -17,4 +17,29 @@
         {% endfor %}
     </ul>
 </div>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ term }}",
+    "description": "{{ explanation|safe|striptags|truncate(150) }}",
+    "url": "https://terms-a2d0dcfc4f4a.herokuapp.com/term/{{ term }}",
+    "author": {
+        "@type": "Person",
+        "name": "Your Name"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Terms Generator",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://terms-a2d0dcfc4f4a.herokuapp.com/static/images/logo.png"
+        }
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://terms-a2d0dcfc4f4a.herokuapp.com/term/{{ term }}"
+    }
+}
+</script>
 {% endblock %}
