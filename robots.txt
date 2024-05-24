@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /set_api_key
+Allow: /
+
+Sitemap: https://terms-a2d0dcfc4f4a.herokuapp.com/sitemap.xml
