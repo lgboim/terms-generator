@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Term: {{ term }}{% endblock %}
+
+{% block content %}
+<div class="card mt-5">
+    <div class="card-body">
+        <h1 class="card-title">{{ term }}</h1>
+        <p class="card-text">{{ explanation|safe }}</p>
+    </div>
+</div>
+<div class="mt-4">
+    <h2>Related Terms:</h2>
+    <ul class="list-group">
+        {% for related_term in related_terms %}
+        <li class="list-group-item"><a href="{{ url_for('term_page', term=related_term) }}">{{ related_term }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
