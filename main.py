@@ -16,14 +16,18 @@ if uri and uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+print("DB URI:", app.config['SQLALCHEMY_DATABASE_URI'])  # This will output the DB URI when you run the app
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 class Term(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     term = db.Column(db.String(120), unique=True, nullable=False)
     explanation = db.Column(db.Text, nullable=False)
     related_terms = db.Column(db.Text, nullable=False)
+
 
 def generate_term_explanation(term, api_key):
     client = OpenAI(api_key=api_key)
