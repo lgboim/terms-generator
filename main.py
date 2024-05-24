@@ -6,7 +6,7 @@ import re
 from openai import OpenAI
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'fallback_secret_key')  # Use environment variable for secrets
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback_secret_key')
 
 # Correcting the DATABASE_URL for PostgreSQL compatibility
 uri = os.getenv('DATABASE_URL')
@@ -16,18 +16,14 @@ if uri and uri.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-print("DB URI:", app.config['SQLALCHEMY_DATABASE_URI'])  # This will output the DB URI when you run the app
-
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
 
 class Term(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     term = db.Column(db.String(120), unique=True, nullable=False)
     explanation = db.Column(db.Text, nullable=False)
     related_terms = db.Column(db.Text, nullable=False)
-
 
 def generate_term_explanation(term, api_key):
     client = OpenAI(api_key=api_key)
@@ -77,22 +73,25 @@ def set_api_key():
     if request.method == 'POST':
         api_key = request.form['api_key']
         session['api_key'] = api_key
-        return redirect(url_for('home'))
+        next_page = request.args.get('next', url_for('home'))
+        return redirect(next_page)
     return render_template('set_api_key.html')
 
 @app.route('/term/<term>')
 def term_page(term):
-    api_key = session.get('api_key')
-    if not api_key:
-        return redirect(url_for('set_api_key'))
-    
     term_data = get_term(term)
-    if not term_data:
-        explanation = generate_term_explanation(term, api_key)
-        related_terms = generate_related_terms(term, api_key)
-        save_term(term, explanation, related_terms)
-        term_data = get_term(term)
-    return render_template('term_page.html', term=term_data['term'], explanation=term_data['explanation'], related_terms=term_data['related_terms'])
+    if term_data:
+        return render_template('term_page.html', term=term_data['term'], explanation=term_data['explanation'], related_terms=term_data['related_terms'])
+    else:
+        if 'api_key' in session:
+            api_key = session['api_key']
+            explanation = generate_term_explanation(term, api_key)
+            related_terms = generate_related_terms(term, api_key)
+            save_term(term, explanation, related_terms)
+            term_data = get_term(term)
+            return render_template('term_page.html', term=term_data['term'], explanation=term_data['explanation'], related_terms=term_data['related_terms'])
+        else:
+            return redirect(url_for('set_api_key', next=url_for('term_page', term=term)))
 
 @app.route('/')
 def home():
