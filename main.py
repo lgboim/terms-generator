@@ -41,7 +41,7 @@ def generate_term_explanation(term, api_key):
 
 def generate_related_terms(term, api_key):
     client = OpenAI(api_key=api_key)
-    prompt = f"List 5 terms closely related to '{term}', separated by commas."
+    prompt = f"List 5 terms closely related to '{term}', capitalized, separated by commas."
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
