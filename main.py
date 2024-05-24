@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Response
 import os
 import re
 from openai import OpenAI
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed for session management
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
 
 # Updated generate_term_explanation and generate_related_terms functions
 def generate_term_explanation(term, api_key):
@@ -17,7 +18,7 @@ def generate_term_explanation(term, api_key):
         n=1,
         temperature=0.7,
     )
-    explanation = response.choices[0].message.content
+    explanation = response.choices[0].message['content']
     explanation = explanation.replace('\n', '<br>')
     return explanation
 
@@ -31,7 +32,7 @@ def generate_related_terms(term, api_key):
         n=1,
         temperature=0.7,
     )
-    related_terms = response.choices[0].message.content
+    related_terms = response.choices[0].message['content']
     related_terms = re.split(r'\d+\.\s*|\s*,\s*|\s+and\s+', related_terms)
     return [t.strip() for t in related_terms if t.strip()]
 
@@ -81,14 +82,44 @@ def home():
     initial_term = "Artificial Intelligence"
     return redirect(url_for('term_page', term=initial_term))
 
-
-# Search functionality
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
         search_term = request.form['search_term']
         return redirect(url_for('term_page', term=search_term))
     return render_template('search.html')
+
+# Function to generate sitemap XML
+def generate_sitemap():
+    pages = []
+    ten_days_ago = (datetime.now() - timedelta(days=10)).date().isoformat()
+
+    # Static URLs
+    pages.append({
+        "loc": url_for('home', _external=True),
+        "lastmod": ten_days_ago,
+        "changefreq": "daily",
+        "priority": "1.0"
+    })
+
+    # Dynamically add term pages
+    terms_dir = os.path.join(app.root_path, 'pages')
+    for filename in os.listdir(terms_dir):
+        if filename.endswith('.txt'):
+            term = filename[:-4]
+            pages.append({
+                "loc": url_for('term_page', term=term, _external=True),
+                "lastmod": ten_days_ago,
+                "changefreq": "weekly",
+                "priority": "0.8"
+            })
+
+    sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+    return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/sitemap.xml', methods=['GET'])
+def sitemap():
+    return generate_sitemap()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
