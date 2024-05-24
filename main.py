@@ -95,8 +95,9 @@ def term_page(term):
 
 @app.route('/')
 def home():
-    initial_term = "Artificial Intelligence"
-    return redirect(url_for('term_page', term=initial_term))
+    # Fetch recent terms from the database, order by most recent
+    recent_terms = Term.query.order_by(Term.id.desc()).limit(10).all()
+    return render_template('home.html', recent_terms=recent_terms)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
