@@ -7,7 +7,13 @@ from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session management
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite')
+
+# Correcting the DATABASE_URL for PostgreSQL compatibility
+uri = os.getenv('DATABASE_URL')
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = uri or 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
